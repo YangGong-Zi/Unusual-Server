@@ -38,4 +38,4 @@ lerna-debug.log*
 cleanegistry.npmmirror.com
 
 # 配置文件
-.config
+config
