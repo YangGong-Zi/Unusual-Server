@@ -7,8 +7,8 @@ import { User } from '@/common/entities/User';
 import { Repository } from 'typeorm';
 import { CaptchaService } from '../captcha/captcha.service';
 import { RedisService } from '../redis/redis.service';
-
-
+import { extractTokenFromHeader } from '@/utils/help';
+import { Request } from 'express';
 @Injectable()
 export class AuthService {
 
@@ -37,11 +37,17 @@ export class AuthService {
         updateTime: user.updateTime,
       }
     })
-    this.redisService.setValue(token, JSON.stringify(user))
+    await this.redisService.setValue(token, JSON.stringify(user))
     return token
   }
   // 注册
   regist(createAuthDto: RegistAuthDto) {
     return 'This action adds a new auth';
+  }
+  // 退出登录
+  async logout(request: Request) {
+    const token = extractTokenFromHeader(request)
+    if(token) this.redisService.deleteKey(token)
+    return '退出登录成功';
   }
 }

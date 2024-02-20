@@ -7,6 +7,7 @@ import { HttpExceptionFilter } from './filter/httpException.filter';
 import { TransformInterceptor } from './interceptors/interceptors.interceptor';
 import { AuthGuard } from './guard/auth.guard';
 import { JwtService } from '@nestjs/jwt';
+import { RedisService } from './common/redis/redis.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -39,7 +40,8 @@ async function bootstrap() {
 
   // 全局守卫
   const jwtService = app.get<JwtService>(JwtService)
-  app.useGlobalGuards(new AuthGuard(jwtService));
+  const redisService = app.get<RedisService>(RedisService)
+  app.useGlobalGuards(new AuthGuard(jwtService, redisService));
 
   await app.listen(appConfig.port);
 

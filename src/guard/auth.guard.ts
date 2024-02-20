@@ -1,13 +1,14 @@
 import { CanActivate, ExecutionContext, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { Request } from 'express';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from 'src/common/decorators/public.decorator';
+import { extractTokenFromHeader } from '@/utils/help';
+import { RedisService } from '@/common/redis/redis.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
 
-  constructor(private readonly jwtService: JwtService) { }
+  constructor(private readonly jwtService: JwtService, private readonly redisService: RedisService) { }
 
   private readonly reflector: Reflector = new Reflector();
 
@@ -26,7 +27,7 @@ export class AuthGuard implements CanActivate {
 
     // 获取请求的内容
     const request = context.switchToHttp().getRequest();
-    const token = this.extractTokenFromHeader(request);
+    const token = extractTokenFromHeader(request);
     // 是否存在token
     if (!token) {
       throw new UnauthorizedException();
@@ -34,19 +35,14 @@ export class AuthGuard implements CanActivate {
     // 验证token是否有效
     try {
       const info = this.jwtService.verify(token);
+
+      // 如果redis中没有已当前token为键的值，那么说明当前token用户已经退出登录
+      if(!await this.redisService.getValue(token)) throw new UnauthorizedException('登录 token 失效，请重新登录');
+
       (request as any).user = info.user;
     } catch(e) {
       throw new UnauthorizedException('登录 token 失效，请重新登录');
     }
     return true;
   }
-
-  // 通过 请求头拿到 token
-  private extractTokenFromHeader(request: Request): string | undefined {
-
-    const [type, token] = request.headers.authorization?.split(' ') ?? [];
-    // return token
-    return type === 'Bearer' ? token : undefined;
-  }
-
 }
