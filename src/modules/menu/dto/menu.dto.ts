@@ -1,6 +1,6 @@
 import { IsDate, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
-export class CreateMenuDto {
+export class MenuDto {
 
   id: number
 
@@ -17,7 +17,7 @@ export class CreateMenuDto {
 
   @IsNotEmpty()
   @IsNumber()
-  visibily: number
+  visibily: boolean
 
   @IsNotEmpty()
   @IsNumber()
@@ -25,14 +25,14 @@ export class CreateMenuDto {
 
   @IsNotEmpty()
   @IsNumber()
-  externalLink: number
+  externalLink: boolean
 
   @IsNotEmpty()
   @IsNumber()
   menuType: number
 
   @IsNumber()
-  keepAlive: number
+  keepAlive: boolean
 
   @IsString()
   icon: string
@@ -58,7 +58,7 @@ export class CreateMenuDto {
   @IsString()
   updater: string
 
-  children: CreateMenuDto[]
+  children: MenuDto[]
 
   isLeaf: boolean
 }

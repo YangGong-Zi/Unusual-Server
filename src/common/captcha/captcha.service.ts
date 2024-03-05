@@ -2,6 +2,8 @@ import { HttpException, Inject, Injectable } from '@nestjs/common';
 import * as svgCaptcha from 'svg-captcha';
 import { v4 as uuidv4 } from 'uuid'
 import { RedisService } from '../redis/redis.service';
+import { readFileSync } from 'fs';
+import { convertSvgToPng } from '@/utils/help';
 
 type Status = 'SUCESS' | 'ERROR' | 'TIMEOUT'
 @Injectable()
@@ -10,13 +12,16 @@ export class CaptchaService {
   private readonly redisService: RedisService;
 
   // 获取验证码
-  getCaptcha(timeOut: number = 60) {
+  async getCaptcha(timeOut: number = 60) {
     // 生成验证码
     const captcha = svgCaptcha.create({ size: 4, ignoreChars: '0o1i', noise: 10, width: 100, height: 34 })
     const uniqueId: string = uuidv4();
     this.redisService.setWithExpiry(uniqueId, captcha.text, timeOut)
+    // 将 SVG 转换为 base64
+    const base64Data = await convertSvgToPng(captcha.data)
+    // const base64Data = Buffer.from(captcha.data).toString('base64');
     return {
-      captcha: captcha.data,
+      captcha: base64Data,
       uid: uniqueId
     };
   }

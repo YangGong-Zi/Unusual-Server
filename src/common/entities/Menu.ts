@@ -1,3 +1,4 @@
+import { booleanTransformer } from "@/utils/typeorm-help";
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity("menu", { schema: "us" })
@@ -8,41 +9,50 @@ export class Menu {
   @Column("int", { name: "pid", comment: "pid" })
   pid: number;
 
-  @Column("varchar", { name: "path", comment: "路由path", length: 255 })
+  @Column("varchar", { name: "path", comment: "路由path", length: 60 })
   path: string;
 
   @Column("varchar", {
     name: "name",
     nullable: true,
     comment: "组件名称",
-    length: 255,
+    length: 60,
   })
   name: string | null;
 
-  @Column("int", { name: "visibily", comment: "是否可见(0：不可见，1：可见)" })
-  visibily: number;
+  @Column("tinyint", {
+    name: "visibily",
+    comment: "是否可见(0：不可见，1：可见)",
+    width: 1,
+  })
+  visibily: boolean;
 
-  @Column("int", { name: "externalLink", comment: "外部链接" })
-  externalLink: number;
+  @Column("tinyint", {
+    name: "externalLink",
+    comment: "外部链接(0：是，1：不是)",
+    width: 1,
+  })
+  externalLink: boolean;
 
-  @Column("int", { name: "menuType", comment: "菜单类型" })
+  @Column("int", { name: "menuType", comment: "菜单类型(0:)" })
   menuType: number;
 
   @Column("int", { name: "sort", comment: "sort排序" })
   sort: number;
 
-  @Column("int", {
+  @Column("tinyint", {
     name: "keepAlive",
     nullable: true,
     comment: "KeepAlive缓存(0：不缓存，1：缓存)",
+    width: 1,
   })
-  keepAlive: number | null;
+  keepAlive: boolean | null;
 
   @Column("varchar", {
     name: "icon",
     nullable: true,
     comment: "图标名称",
-    length: 255,
+    length: 100,
   })
   icon: string | null;
 
@@ -50,7 +60,7 @@ export class Menu {
     name: "title",
     nullable: true,
     comment: "名称",
-    length: 255,
+    length: 100,
   })
   title: string | null;
 
@@ -66,7 +76,7 @@ export class Menu {
     name: "component",
     nullable: true,
     comment: "组件路径",
-    length: 255,
+    length: 100,
   })
   component: string | null;
 
@@ -99,4 +109,13 @@ export class Menu {
     length: 50,
   })
   creator: string | null;
+
+  @Column("tinyint", {
+    name: "isLeaf",
+    nullable: true,
+    comment: "是否存在子节点（0：不存在，1：存在）",
+    width: 1,
+    transformer: booleanTransformer
+  })
+  isLeaf: boolean | null;
 }

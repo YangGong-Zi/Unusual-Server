@@ -9,6 +9,9 @@ import { CaptchaService } from '../captcha/captcha.service';
 import { RedisService } from '../redis/redis.service';
 import { extractTokenFromHeader } from '@/utils/help';
 import { Request } from 'express';
+import { decrypt } from '@/utils/ase';
+import { md5Encrypt } from '@/utils/md5';
+
 @Injectable()
 export class AuthService {
 
@@ -24,7 +27,8 @@ export class AuthService {
   // 登录
   async login(loginAuthDto: LoginAuthDto) {
     await this.captchaService.validateCaptcha(loginAuthDto.captchaText, loginAuthDto.captchaUid);
-    const user = await this.userRepository.findOneBy({ name: loginAuthDto.name, password: loginAuthDto.password })
+    const pwd = md5Encrypt(md5Encrypt(decrypt(loginAuthDto.password)))
+    const user = await this.userRepository.findOneBy({ account: loginAuthDto.name, password: pwd })
     if (!user) throw new HttpException({ message: '用户名或密码错误', code: 999 }, 200);
     const token = this.jwtService.sign({
       user: {

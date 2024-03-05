@@ -20,6 +20,5 @@ export class GithubService {
   githubApi(path: string = '')  {
     const data = this.httpService.get(this.baseUrl + path, this.config)
     return data.pipe(map(res => res.data));
-
   }
 }

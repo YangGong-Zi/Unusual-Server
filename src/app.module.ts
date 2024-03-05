@@ -6,7 +6,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { UserModule } from './modules/user/user.module';
-import { SystemModule } from './modules/system/system.module';
 import { LoggerModule } from './common/logger/logger.module';
 import { RedisModule } from './common/redis/redis.module';
 import { CaptchaModule } from './common/captcha/captcha.module';
@@ -14,6 +13,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from './common/auth/auth.module';
 import { GithubModule } from './modules/github/github.module';
 import { MenuModule } from './modules/menu/menu.module';
+import { DictModule } from './modules/dict/dict.module';
+import { RoleModule } from './modules/role/role.module';
 
 @Module({
   imports: [
@@ -59,13 +60,14 @@ import { MenuModule } from './modules/menu/menu.module';
       }
     }),
     UserModule,
-    SystemModule,
     LoggerModule,
     RedisModule,
     CaptchaModule,
     AuthModule,
     GithubModule,
     MenuModule,
+    DictModule,
+    RoleModule,
   ],
   controllers: [AppController],
   providers: [

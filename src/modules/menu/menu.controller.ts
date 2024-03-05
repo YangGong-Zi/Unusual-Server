@@ -1,6 +1,6 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Query } from '@nestjs/common';
 import { MenuService } from './menu.service';
-import { CreateMenuDto } from './dto/create-menu.dto';
+import { MenuDto } from './dto/menu.dto';
 import { UpdateMenuDto } from './dto/update-menu.dto';
 import { Request } from 'express';
 
@@ -9,18 +9,18 @@ export class MenuController {
   constructor(private readonly menuService: MenuService) {}
 
   @Post('/add')
-  add(@Body() createMenuDto: CreateMenuDto, @Req() req: Request) {
-    return this.menuService.create(createMenuDto, req);
+  add(@Body() menu: MenuDto, @Req() req: Request) {
+    return this.menuService.create(menu, req);
   }
 
   @Get('/treeMenu')
-  findAll() {
+  findTreeMenu() {
     return this.menuService.findTreeMenu();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.menuService.findOne(+id);
+  @Get()
+  findAll(@Query('pid') pid: string, @Query('title') title: string) {
+    return this.menuService.findAll(pid, title);
   }
 
   @Patch(':id')

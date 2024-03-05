@@ -5,11 +5,19 @@ export class User {
   @PrimaryGeneratedColumn({ type: "int", name: "id", comment: "用户主键ID" })
   id: number;
 
-  @Column("varchar", { name: "name", comment: "用户名", length: 50 })
-  name: string;
+  @Column("varchar", {
+    name: "account",
+    nullable: true,
+    comment: "账号",
+    length: 255,
+  })
+  account: string | null;
 
   @Column("varchar", { name: "password", comment: "用户密码", length: 255 })
   password: string;
+
+  @Column("varchar", { name: "name", comment: "用户名称", length: 50 })
+  name: string;
 
   @Column("int", { name: "status", comment: "用户状态（0-禁用，1-启用）" })
   status: number;

@@ -1,7 +1,7 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { CreateMenuDto } from './dto/create-menu.dto';
+import { Inject, Injectable, Query } from '@nestjs/common';
+import { MenuDto } from './dto/menu.dto';
 import { UpdateMenuDto } from './dto/update-menu.dto';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { Menu as MenuEntity } from '~/entities/Menu';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Request } from 'express';
@@ -17,7 +17,7 @@ export class MenuService {
   @Inject(RedisService)
   private readonly redisService: RedisService
 
-  async create(createMenuDto: CreateMenuDto, req: Request) {
+  async create(createMenuDto: MenuDto, req: Request) {
     const token = extractTokenFromHeader(req)
     const user = JSON.parse(await this.redisService.getValue(token))
     this.menuRepo.save({ ...createMenuDto, createTime: new Date(), creator: user?.name });
@@ -26,13 +26,17 @@ export class MenuService {
 
   async findTreeMenu() {
     const menu = await this.menuRepo.find();
-    const treeMenu = this.convertToTree(menu as CreateMenuDto[]);
+    const treeMenu = this.convertToTree(menu as MenuDto[], false);
 
     return treeMenu;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} menu`;
+  async findAll(pid: string, title: string) {
+    let query = {}
+    if(pid !== undefined) query = { pid };
+    if(title) query = { ...query, title: ILike(`%${title}%`) };
+    const menu = await this.menuRepo.find({ where : query } );
+    return menu;
   }
 
   update(id: number, updateMenuDto: UpdateMenuDto) {
@@ -43,49 +47,52 @@ export class MenuService {
     return `This action removes a #${id} menu`;
   }
 
-  convertToTree(menus: CreateMenuDto[]): CreateMenuDto[] {
-    const map: Record<number, CreateMenuDto> = {}
-    const tree: CreateMenuDto[] = []
+  // 转为树形结构
+  convertToTree(menus: MenuDto[], isAll: boolean = true): MenuDto[] {
+    const map: Record<number, MenuDto> = {}
+    const tree: MenuDto[] = []
 
     menus.forEach(menu => {
-      const { id, pid } = menu
+      if (menu.menuType !== 2 || isAll) {
+        const { id, pid } = menu
 
-      map[id] = {
-        id: menu.id,
-        pid: menu.pid,
-        path: menu.path,
-        name: menu.name,
-        component: menu.component,
-        title: menu.title,
-        visibily: menu.visibily,
-        icon: menu.icon || '',
-        keepAlive: menu.keepAlive || 0,
-        menuType: menu.menuType,
-        externalLink: menu.externalLink || 0,
-        link: menu.link || '',
-        sort: menu.sort,
-        children: map[id]?.children || [],
-        createTime: menu.createTime,
-        creator: menu.creator,
-        updateTime: menu.updateTime,
-        updater: menu.updater,
-        isLeaf: false
-      }
-      if (pid === 0) {
-        tree.push(map[id])
-      } else {
-        if (!map[pid]) {
-          map[pid] = {} as CreateMenuDto
-          map[pid].children = []
+        map[id] = {
+          id: menu.id,
+          pid: menu.pid,
+          path: menu.path,
+          name: menu.name,
+          component: menu.component,
+          title: menu.title,
+          visibily: menu.visibily,
+          icon: menu.icon || '',
+          keepAlive: menu.keepAlive || false,
+          menuType: menu.menuType,
+          externalLink: menu.externalLink || false,
+          link: menu.link || '',
+          sort: menu.sort,
+          children: map[id]?.children || [],
+          createTime: menu.createTime,
+          creator: menu.creator,
+          updateTime: menu.updateTime,
+          updater: menu.updater,
+          isLeaf: menu.isLeaf || false
         }
-        map[pid].children?.push(map[id])
+        if (pid === 0) {
+          tree.push(map[id])
+        } else {
+          if (!map[pid]) {
+            map[pid] = {} as MenuDto
+            map[pid].children = []
+          }
+          map[pid].children?.push(map[id])
+        }
       }
     })
     return this.removeEmptyAndSortTree(tree)
   }
 
   // 排序和去除空children
-  removeEmptyAndSortTree(tree: CreateMenuDto[]) {
+  removeEmptyAndSortTree(tree: MenuDto[]) {
     tree.sort((a, b) => a.sort - b.sort)
     tree.forEach(item => {
       if (!item.children || item.children.length === 0) {
@@ -95,15 +102,5 @@ export class MenuService {
       }
     })
     return tree
-  }
-
-  // 生成懒加载结构跟排序
-  sortMenu(menu: CreateMenuDto[], menus: CreateMenuDto[]) {
-    menu.sort((a, b) => a.sort - b.sort)
-    menu.map(item => {
-      const children = menus.filter(menu => item.id === menu.pid)
-      item.isLeaf = children.length > 0 ? false : true
-    })
-    return menu
   }
 }
