@@ -14,9 +14,6 @@ export class Role {
   @Column("int", { name: "status", comment: "角色状态：1-启用、0-禁用" })
   status: number;
 
-  @Column("varchar", { name: "menu", comment: "菜单权限", length: 500 })
-  menu: string;
-
   @Column("varchar", {
     name: "remark",
     nullable: true,

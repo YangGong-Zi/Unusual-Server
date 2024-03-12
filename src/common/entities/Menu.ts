@@ -24,6 +24,7 @@ export class Menu {
     name: "visibily",
     comment: "是否可见(0：不可见，1：可见)",
     width: 1,
+    transformer: booleanTransformer
   })
   visibily: boolean;
 
@@ -31,6 +32,7 @@ export class Menu {
     name: "externalLink",
     comment: "外部链接(0：是，1：不是)",
     width: 1,
+    transformer: booleanTransformer
   })
   externalLink: boolean;
 
@@ -45,6 +47,7 @@ export class Menu {
     nullable: true,
     comment: "KeepAlive缓存(0：不缓存，1：缓存)",
     width: 1,
+    transformer: booleanTransformer
   })
   keepAlive: boolean | null;
 
@@ -79,6 +82,14 @@ export class Menu {
     length: 100,
   })
   component: string | null;
+
+  @Column("varchar", {
+    name: "competence",
+    nullable: true,
+    comment: "权限标识",
+    length: 50,
+  })
+  competence: string | null;
 
   @Column("datetime", {
     name: "updateTime",

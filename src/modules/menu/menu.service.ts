@@ -1,12 +1,10 @@
-import { Inject, Injectable, Query } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { MenuDto } from './dto/menu.dto';
 import { UpdateMenuDto } from './dto/update-menu.dto';
 import { ILike, Repository } from 'typeorm';
 import { Menu as MenuEntity } from '~/entities/Menu';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Request } from 'express';
-import { extractTokenFromHeader } from '@/utils/help';
-import { RedisService } from '@/common/redis/redis.service';
 
 
 @Injectable()
@@ -14,18 +12,16 @@ export class MenuService {
 
   @InjectRepository(MenuEntity)
   private readonly menuRepo: Repository<MenuEntity>
-  @Inject(RedisService)
-  private readonly redisService: RedisService
 
-  async create(createMenuDto: MenuDto, req: Request) {
-    const token = extractTokenFromHeader(req)
-    const user = JSON.parse(await this.redisService.getValue(token))
-    this.menuRepo.save({ ...createMenuDto, createTime: new Date(), creator: user?.name });
+  async create(menuDto: MenuDto, req: Request) {
+    const user = JSON.parse(req.headers.user as string)
+    this.menuRepo.save({ ...menuDto, createTime: new Date(), creator: user?.name });
     return '创建成功';
   }
 
-  async findTreeMenu() {
-    const menu = await this.menuRepo.find();
+  async findTreeMenu(req: Request) {
+    const user = JSON.parse(req.headers.user as string)
+    const menu = user.menu;
     const treeMenu = this.convertToTree(menu as MenuDto[], false);
 
     return treeMenu;
@@ -64,18 +60,18 @@ export class MenuService {
           component: menu.component,
           title: menu.title,
           visibily: menu.visibily,
-          icon: menu.icon || '',
-          keepAlive: menu.keepAlive || false,
+          icon: menu.icon,
+          keepAlive: menu.keepAlive,
           menuType: menu.menuType,
-          externalLink: menu.externalLink || false,
-          link: menu.link || '',
+          externalLink: menu.externalLink,
+          link: menu.link,
           sort: menu.sort,
           children: map[id]?.children || [],
           createTime: menu.createTime,
           creator: menu.creator,
           updateTime: menu.updateTime,
           updater: menu.updater,
-          isLeaf: menu.isLeaf || false
+          isLeaf: menu.isLeaf
         }
         if (pid === 0) {
           tree.push(map[id])

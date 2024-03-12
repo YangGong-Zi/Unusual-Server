@@ -3,9 +3,9 @@ import { Request } from 'express';
 // 通过 请求头拿到 token
 export const extractTokenFromHeader = (request: Request): string | undefined => {
 
-  const [type, token] = request.headers.authorization?.split(' ') ?? [];
-  // return token
-  return type === 'Bearer' ? token : undefined;
+  const token = request.headers.authorization;
+  return token
+  // return type === 'Bearer' ? token : undefined;
 }
 
 // 把svg转换为图片的base64

@@ -1,15 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Query, Put, Req, Res } from '@nestjs/common';
 import { DictService } from './dict.service';
-import { CreateDictDto } from './dto/dict.dto';
+import { DictDto } from './dto/dict.dto';
 import { UpdateDictDto } from './dto/update-dict.dto';
+import { Request, Response } from 'express';
 
 @Controller('dict')
 export class DictController {
   constructor(private readonly dictService: DictService) {}
 
   @Post()
-  create(@Body() createDictDto: CreateDictDto) {
-    return this.dictService.create(createDictDto);
+  create(@Body() DictDto: DictDto,  @Req() req: Request) {
+    return this.dictService.create(DictDto, req);
   }
 
   @Get()
@@ -17,13 +18,22 @@ export class DictController {
     return this.dictService.findAll(page, pageSize, name);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateDictDto: UpdateDictDto) {
-    return this.dictService.update(+id, updateDictDto);
+  @Put()
+  update(@Body() updateDictDto: UpdateDictDto, @Req() req: Request) {
+    return this.dictService.update(updateDictDto, req);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.dictService.remove(+id);
+  remove(@Param('id') id: number) {
+    return this.dictService.remove(id);
+  }
+
+  @Post('/download')
+  async exportExcel(@Query('name') name: string, @Res() res: Response) {
+    const buffer = await this.dictService.exportExcel(name)
+    res.set({
+      'Content-Type': 'application/octet-stream'
+    });
+    res.send(buffer)
   }
 }

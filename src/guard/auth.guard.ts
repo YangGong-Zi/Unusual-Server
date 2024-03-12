@@ -39,7 +39,7 @@ export class AuthGuard implements CanActivate {
       // 如果redis中没有已当前token为键的值，那么说明当前token用户已经退出登录
       if(!await this.redisService.getValue(token)) throw new UnauthorizedException('登录 token 失效，请重新登录');
 
-      (request as any).user = info.user;
+      request.headers.user = JSON.stringify(info.user);
     } catch(e) {
       throw new UnauthorizedException('登录 token 失效，请重新登录');
     }

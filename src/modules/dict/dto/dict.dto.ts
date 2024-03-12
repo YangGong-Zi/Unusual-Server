@@ -1,6 +1,6 @@
 import { IsDate, IsNotEmpty, IsNumber, IsString } from "class-validator";
 
-export class CreateDictDto {
+export class DictDto {
   @IsNumber()
   id: number;
 

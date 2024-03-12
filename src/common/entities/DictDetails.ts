@@ -14,13 +14,8 @@ export class DictDetails {
   @Column("varchar", { name: "value", comment: "字典键", length: 10 })
   value: string;
 
-  @Column("varchar", {
-    name: "dictSort",
-    nullable: true,
-    comment: "字典值描述",
-    length: 100,
-  })
-  dictSort: string | null;
+  @Column("int", { name: "dictSort", nullable: true, comment: "字典值描述" })
+  dictSort: number | null;
 
   @Column("datetime", {
     name: "createTime",

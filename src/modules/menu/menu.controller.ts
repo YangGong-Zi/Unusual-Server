@@ -14,8 +14,8 @@ export class MenuController {
   }
 
   @Get('/treeMenu')
-  findTreeMenu() {
-    return this.menuService.findTreeMenu();
+  findTreeMenu(@Req() req: Request) {
+    return this.menuService.findTreeMenu(req);
   }
 
   @Get()

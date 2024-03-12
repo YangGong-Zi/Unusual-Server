@@ -15,6 +15,7 @@ import { GithubModule } from './modules/github/github.module';
 import { MenuModule } from './modules/menu/menu.module';
 import { DictModule } from './modules/dict/dict.module';
 import { RoleModule } from './modules/role/role.module';
+import { DictDetailsModule } from './modules/dict-details/dict-details.module';
 
 @Module({
   imports: [
@@ -30,10 +31,6 @@ import { RoleModule } from './modules/role/role.module';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
         return {
-          type: 'mysql',
-          autoLoadEntities: true,
-          keepConnectionAlive: true,
-          synchronize: false, // 是否开启自动迁移，建议禁用，风险不可控
           ...config.get('MYSQL'),
         } as TypeOrmModuleOptions
       },
@@ -68,6 +65,7 @@ import { RoleModule } from './modules/role/role.module';
     MenuModule,
     DictModule,
     RoleModule,
+    DictDetailsModule,
   ],
   controllers: [AppController],
   providers: [

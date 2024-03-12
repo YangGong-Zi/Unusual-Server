@@ -61,4 +61,6 @@ export class MenuDto {
   children: MenuDto[]
 
   isLeaf: boolean
+
+  competence?: string
 }

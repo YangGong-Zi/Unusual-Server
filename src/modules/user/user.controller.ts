@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
+import { UserDto } from './dto/user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiHeader, ApiTags } from '@nestjs/swagger';
+import { Request } from 'express';
 
 @Controller({
   path: "user",
@@ -19,7 +20,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
+  create(@Body() createUserDto: UserDto) {
     return this.userService.create(createUserDto);
   }
 
@@ -29,10 +30,8 @@ export class UserController {
   }
 
   @Get('/info')
-  findOneInfo() {
-    return {
-      id: 10
-    }
+  findOneInfo(@Req() req: Request) {
+    return this.userService.info(req)
   }
 
   @Get(':id')
