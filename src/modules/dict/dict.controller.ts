@@ -3,6 +3,7 @@ import { DictService } from './dict.service';
 import { DictDto } from './dto/dict.dto';
 import { UpdateDictDto } from './dto/update-dict.dto';
 import { Request, Response } from 'express';
+import { QueryDto } from './dto/query.dto';
 
 @Controller('dict')
 export class DictController {
@@ -29,11 +30,16 @@ export class DictController {
   }
 
   @Post('/download')
-  async exportExcel(@Query('name') name: string, @Res() res: Response) {
-    const buffer = await this.dictService.exportExcel(name)
+  async exportExcel(@Body() queryDto: QueryDto, @Res() res: Response) {
+    const buffer = await this.dictService.exportExcel(queryDto)
     res.set({
       'Content-Type': 'application/octet-stream'
     });
     res.send(buffer)
+  }
+
+  @Get('/details')
+  findDetails(@Query('name') name: string) {
+    return this.dictService.findDetails(name);
   }
 }

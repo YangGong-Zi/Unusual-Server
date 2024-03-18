@@ -14,10 +14,12 @@ import { md5Encrypt } from '@/utils/md5';
 import { UserRole } from '../entities/UserRole';
 import { RoleMenu } from '../entities/RoleMenu';
 import { Menu } from '../entities/Menu';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
 
+  // constructor (private configService: ConfigService) {}
   @InjectRepository(User)
   private readonly userRepo: Repository<User>
   @InjectRepository(UserRole)
@@ -33,6 +35,8 @@ export class AuthService {
   private readonly jwtService: JwtService
   @Inject(RedisService)
   private readonly redisService: RedisService
+  @Inject(ConfigService)
+  private readonly configService: ConfigService
 
   // 登录
   async login(loginAuthDto: LoginAuthDto) {
@@ -45,7 +49,7 @@ export class AuthService {
       const roleMenus = await this.roleMenu.find({ where: { roleId: userRole.roleId } });
       const menuPromises = roleMenus.map(async (roleMenu) => {
         const menu = await this.menu.findOne({ where: { id: roleMenu.menuId } });
-        return menu; // 如果menu存在则返回competence，否则返回空字符串
+        return menu;
       });
       return Promise.all(menuPromises);
     });
@@ -53,19 +57,20 @@ export class AuthService {
     const menus = await Promise.all(roleMenuPromises);
 
     // 获取用户的权限标识
-    const competences = menus.flat().map((menu) => {
+    const competences = menus.flat().filter(Boolean).map((menu) => {
       return menu.competence
-    }).filter(Boolean);
+    });
 
     if (!user) throw new HttpException({ message: '用户名或密码错误', code: 999 }, 200);
     const token = this.jwtService.sign({
       user: {
         ...user,
         password: undefined,
-        role: competences,
-        menu: menus.flat()
+        role: competences
       }
     })
+    const appconfig = this.configService.get('APP');
+    this.redisService.setWithExpiry(token, JSON.stringify(user), appconfig.tokenTime)
     await this.redisService.setValue(token, JSON.stringify(user))
     return token
   }

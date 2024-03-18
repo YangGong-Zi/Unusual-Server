@@ -8,8 +8,8 @@ export class Role {
   @Column("varchar", { name: "name", comment: "角色名称", length: 50 })
   name: string;
 
-  @Column("varchar", { name: "sort", comment: "角色排序", length: 10 })
-  sort: string;
+  @Column("int", { name: "sort", comment: "角色排序" })
+  sort: number;
 
   @Column("int", { name: "status", comment: "角色状态：1-启用、0-禁用" })
   status: number;

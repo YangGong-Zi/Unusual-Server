@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Req, Query, Put, Res } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserDto } from './dto/user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiHeader, ApiTags } from '@nestjs/swagger';
-import { Request } from 'express';
+import { Request, Response } from 'express';
+import { QueryDto } from './dto/query.dto';
 
 @Controller({
   path: "user",
@@ -20,13 +21,19 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  create(@Body() createUserDto: UserDto) {
-    return this.userService.create(createUserDto);
+  create(@Body() userDto: UserDto, @Req() req: Request) {
+    return this.userService.create(userDto, req);
   }
 
   @Get()
-  findAll() {
-    return this.userService.findAll();
+  findAll(
+    @Query('page') page: number,
+    @Query('pageSize') pageSize: number,
+    @Query('account') account: string,
+    @Query('status') status: number,
+    @Query('phone') phone: string
+  ) {
+    return this.userService.findAll(page, pageSize, account, status, phone);
   }
 
   @Get('/info')
@@ -39,13 +46,25 @@ export class UserController {
     return this.userService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+  @Put()
+  update(@Body() updateUserDto: UpdateUserDto, @Req() req: Request) {
+    return this.userService.update( updateUserDto, req);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.userService.remove(+id);
+  }
+
+  @Post('/download')
+  async exportExcel(
+    @Body() queryDto: QueryDto,
+    @Res() res: Response
+  ) {
+    const buffer = await this.userService.exportExcel(queryDto)
+    res.set({
+      'Content-Type': 'application/octet-stream'
+    });
+    res.send(buffer)
   }
 }

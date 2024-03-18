@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { DictDetailDto } from './dto/dict-detail.dto';
 import { UpdateDictDetailDto } from './dto/update-dict-detail.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -21,11 +21,11 @@ export class DictDetailsService {
     }
     const savedDict = await this.dictDetails.save(data);
     if (savedDict) return '新增成功';
-    throw new Error('新增失败');
+    throw new HttpException({message: '新增失败'}, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
   async findAll(page: number, pageSize: number, pid: number) {
-    const dictDetail = await this.dictDetails.find({
+    const [dictDetail, total] = await this.dictDetails.findAndCount({
       where: { pid: pid },
       skip: (page - 1) * pageSize,
       take: pageSize,
@@ -33,7 +33,6 @@ export class DictDetailsService {
         id: 'ASC'
       }
     });
-    const total = await this.dictDetails.count({ where: { pid: pid } });
     return { data: dictDetail, total };
   }
 
@@ -46,12 +45,22 @@ export class DictDetailsService {
     }
     const result = await this.dictDetails.update(updateDictDetailDto.id, data);
     if (result.affected > 0) return '修改成功';
-    throw new Error('修改失败');
+    throw new HttpException({message: '修改失败'}, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
   async remove(id: number) {
     const result = await this.dictDetails.delete(id);
     if (result.affected > 0) return '删除成功';
-    throw new Error('删除失败');
+    throw new HttpException({message: '删除失败'}, HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  async findByPid(pid: number) {
+    const dictDetail = await this.dictDetails.find({
+      where: { pid: pid },
+      order: {
+        dictSort: 'ASC'
+      }
+    });
+    return dictDetail;
   }
 }

@@ -13,10 +13,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const status = exception.getStatus();
     // 用于接收主动发错的错误信息
     const { message, code } = exception.getResponse() as any;
+    const errorMessage = message || '发生了未知的错误，请联系管理员';
     response.status(status).json({
       code: code || status,
       data: 'Bad Request',
-      message: message === 'Unauthorized' ? '没有访问权限' : message,
+      message: message === 'Unauthorized' ? '没有访问权限' : errorMessage,
       path: request.url,
       timestamp: moment().format('yyyy-MM-DD HH:mm:ss'),
     });

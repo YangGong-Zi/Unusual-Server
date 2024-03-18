@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { DictDto } from './dto/dict.dto';
 import { UpdateDictDto } from './dto/update-dict.dto';
 import { Dict as DictEntity } from '@/common/entities/Dict';
@@ -6,9 +6,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ILike, Repository } from 'typeorm';
 import { Request } from 'express';
 import { generateExcel } from '@/utils/excel';
+import { DictDetailsService } from '../dict-details/dict-details.service';
+import { QueryDto } from './dto/query.dto';
 
 @Injectable()
 export class DictService {
+
+  constructor(private readonly dictDetailsService: DictDetailsService) {}
 
   @InjectRepository(DictEntity)
   private readonly dictEntity: Repository<DictEntity>
@@ -22,27 +26,22 @@ export class DictService {
     }
     const savedDict = await this.dictEntity.save(data);
     if (savedDict) return '新增成功';
-    throw new Error('新增失败');
+    throw new HttpException({message: '新增失败'}, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
   async findAll(page: number, pageSize: number, name: string) {
-    const dict = await this.dictEntity.find({
+    const [dict, total] = await this.dictEntity.findAndCount({
       where: [
         { name: ILike(`%${name}%`) },
         { description: ILike(`%${name}%`) }
       ],
-      skip: (page - 1) * pageSize,
       take: pageSize,
+      skip: (page - 1) * pageSize,
       order: {
         id: 'ASC'
       }
     });
-    const total = await this.dictEntity.count({
-      where: [
-        { name: ILike(`%${name}%`) },
-        { description: ILike(`%${name}%`) }
-      ]
-    });
+
 
     return { data: dict, total };
   }
@@ -56,16 +55,17 @@ export class DictService {
     }
     const result = await this.dictEntity.update(updateDictDto.id, data);
     if (result.affected > 0) return '修改成功';
-    throw new Error('修改失败');
+    throw new HttpException({message: '修改失败'}, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
   async remove(id: number) {
     const result = await this.dictEntity.delete(id);
     if (result.affected > 0) return '删除成功';
-    throw new Error('删除失败');
+    throw new HttpException({message: '删除失败'}, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
-  async exportExcel(name: string = '') {
+  async exportExcel(queryDto: QueryDto) {
+    const name = queryDto.name || '';
     const data = await this.dictEntity.find({
       where: [
         { name: ILike(`%${name}%`) },
@@ -86,5 +86,11 @@ export class DictService {
     ]
     const buffer = await generateExcel(data, header)
     return buffer
+  }
+
+  async findDetails(name: string) {
+    const dict = await this.dictEntity.findOne({ where: { name: name } });
+    const data = await this.dictDetailsService.findByPid(dict.id)
+    return data;
   }
 }

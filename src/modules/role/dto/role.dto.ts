@@ -1,7 +1,7 @@
 export class RoleDto {
   id: number;
   name: string;
-  sort: string;
+  sort: number;
   status: number;
   remark: string | null;
   createTime: Date | null;
