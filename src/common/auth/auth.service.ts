@@ -43,31 +43,10 @@ export class AuthService {
     await this.captchaService.validateCaptcha(loginAuthDto.captchaText, loginAuthDto.captchaUid);
     const pwd = md5Encrypt(md5Encrypt(decrypt(loginAuthDto.password)))
     const user = await this.userRepo.findOneBy({ account: loginAuthDto.name, password: pwd })
-    const userRoles = await this.userRole.find({ select: ['roleId'], where: { userId: user.id } });
-
-    const roleMenuPromises = userRoles.map(async (userRole) => {
-      const roleMenus = await this.roleMenu.find({ where: { roleId: userRole.roleId } });
-      const menuPromises = roleMenus.map(async (roleMenu) => {
-        const menu = await this.menu.findOne({ where: { id: roleMenu.menuId } });
-        return menu;
-      });
-      return Promise.all(menuPromises);
-    });
-
-    const menus = await Promise.all(roleMenuPromises);
-
-    // 获取用户的权限标识
-    const competences = menus.flat().filter(Boolean).map((menu) => {
-      return menu.competence
-    });
 
     if (!user) throw new HttpException({ message: '用户名或密码错误', code: 999 }, 200);
     const token = this.jwtService.sign({
-      user: {
-        ...user,
-        password: undefined,
-        role: competences
-      }
+      user
     })
     const appconfig = this.configService.get('APP');
     this.redisService.setWithExpiry(token, JSON.stringify(user), appconfig.tokenTime)

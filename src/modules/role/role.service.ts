@@ -119,6 +119,7 @@ export class RoleService {
 
   async saveRoleMenu(roleId: number, menuIds: number[]) {
     try {
+      await this.roleMenu.delete({ roleId: roleId })
       const resultPromiss = await menuIds.map(async item => {
         const menu = await this.roleMenu.save({
           menuId: item,

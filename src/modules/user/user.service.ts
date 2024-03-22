@@ -8,6 +8,8 @@ import { UserRole } from '@/common/entities/UserRole';
 import { Request } from 'express';
 import { generateExcel } from '@/utils/excel';
 import { QueryDto } from './dto/query.dto';
+import { RoleMenu } from '@/common/entities/RoleMenu';
+import { Menu } from '@/common/entities/Menu';
 
 @Injectable()
 export class UserService {
@@ -16,6 +18,11 @@ export class UserService {
   private readonly userRepo: Repository<UserEntity>
   @InjectRepository(UserRole)
   private readonly userRole: Repository<UserRole>
+  @InjectRepository(RoleMenu)
+  private readonly roleMenu: Repository<RoleMenu>
+  @InjectRepository(Menu)
+  private readonly menu: Repository<Menu>
+
 
 
   async create(userDto: UserDto, req: Request) {
@@ -90,6 +97,7 @@ export class UserService {
       updater: user.account
     }
     if (updateUserDto.roles) {
+      await this.userRole.delete({ userId: updateUserDto.id })
       const rolePromiss = updateUserDto.roles.map(async item => {
         const userRole = {
           userId: updateUserDto.id,
@@ -98,6 +106,7 @@ export class UserService {
         const role = await this.userRole.save(userRole)
         return role
       })
+      await Promise.all(rolePromiss)
     }
     const result = await this.userRepo.update(id, data);
     if (result.affected > 0) return '修改成功';
@@ -112,7 +121,24 @@ export class UserService {
 
   async info(req: Request) {
     const user = JSON.parse(req.headers.user as string);
-    return {...user};
+    const userRoles = await this.userRole.find({ select: ['roleId'], where: { userId: user.id } });
+    const roleMenuPromises = userRoles.map(async (userRole) => {
+      const roleMenus = await this.roleMenu.find({ where: { roleId: userRole.roleId } });
+      const menuPromises = roleMenus.map(async (roleMenu) => {
+        const menu = await this.menu.findOne({ where: { id: roleMenu.menuId } });
+        return menu;
+      });
+      return Promise.all(menuPromises);
+    });
+
+    const menus = await Promise.all(roleMenuPromises);
+
+    // 获取用户的权限标识
+    const competences = menus.flat().filter(Boolean).map((menu) => {
+      return menu.competence
+    }).filter(Boolean);
+
+    return {...user, roles: [...new Set(competences)]};
   }
 
   async exportExcel(queryDto: QueryDto) {

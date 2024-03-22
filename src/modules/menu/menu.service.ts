@@ -37,7 +37,6 @@ export class MenuService {
       return this.convertToTree(menus as MenuDto[], isAll);
     }
     const userRoles = await this.userRole.find({ select: ['roleId'], where: { userId: user.id } });
-
     const roleMenuPromises = userRoles.map(async (userRole) => {
       const roleMenus = await this.roleMenu.find({ where: { roleId: userRole.roleId } });
       const menuPromises = roleMenus.map(async (roleMenu) => {
@@ -47,8 +46,15 @@ export class MenuService {
       return Promise.all(menuPromises);
     });
 
-    const menus = await Promise.all(roleMenuPromises);
-    const treeMenu = this.convertToTree(menus.flat().filter(Boolean) as MenuDto[], isAll);
+    const tempMenus = await Promise.all(roleMenuPromises);
+    const menus = tempMenus.flat().filter(Boolean);
+    const parentMenuPromiss = menus.map(async menu => {
+      if (menu.pid !== 0 && menus.findIndex(menu => menu.id === menu.pid) === -1) {
+        return await this.menuRepo.findOne({ where: { id: menu.pid } });
+      }
+    })
+    const parentMenus = await Promise.all(parentMenuPromiss);
+    const treeMenu = this.convertToTree([...menus, ...parentMenus.filter(Boolean)] as MenuDto[], isAll);
 
     return treeMenu;
   }
