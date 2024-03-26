@@ -49,7 +49,7 @@ export class MenuService {
     const tempMenus = await Promise.all(roleMenuPromises);
     const menus = tempMenus.flat().filter(Boolean);
     const parentMenuPromiss = menus.map(async menu => {
-      if (menu.pid !== 0 && menus.findIndex(menu => menu.id === menu.pid) === -1) {
+      if (menu.pid !== 0 && menus.findIndex(item => menu.pid === item.id) < 0) {
         return await this.menuRepo.findOne({ where: { id: menu.pid } });
       }
     })

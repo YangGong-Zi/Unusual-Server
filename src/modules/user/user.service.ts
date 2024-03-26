@@ -137,6 +137,9 @@ export class UserService {
     const competences = menus.flat().filter(Boolean).map((menu) => {
       return menu.competence
     }).filter(Boolean);
+    if (user.account === 'admin') {
+      competences.push('admin')
+    }
 
     return {...user, roles: [...new Set(competences)]};
   }
