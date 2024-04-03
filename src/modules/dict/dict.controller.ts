@@ -4,12 +4,14 @@ import { DictDto } from './dto/dict.dto';
 import { UpdateDictDto } from './dto/update-dict.dto';
 import { Request, Response } from 'express';
 import { QueryDto } from './dto/query.dto';
+import { CheckPermissions } from '@/common/decorators/checkPermissions.decorator';
 
 @Controller('dict')
 export class DictController {
   constructor(private readonly dictService: DictService) {}
 
   @Post()
+  @CheckPermissions(['admin', 'dict:del'])
   create(@Body() DictDto: DictDto,  @Req() req: Request) {
     return this.dictService.create(DictDto, req);
   }
@@ -20,16 +22,19 @@ export class DictController {
   }
 
   @Put()
+  @CheckPermissions(['admin', 'dict:edit'])
   update(@Body() updateDictDto: UpdateDictDto, @Req() req: Request) {
     return this.dictService.update(updateDictDto, req);
   }
 
   @Delete(':id')
+  @CheckPermissions(['admin', 'dict:del'])
   remove(@Param('id') id: number) {
     return this.dictService.remove(id);
   }
 
   @Post('/download')
+  @CheckPermissions(['admin', 'dict:download'])
   async exportExcel(@Body() queryDto: QueryDto, @Res() res: Response) {
     const buffer = await this.dictService.exportExcel(queryDto)
     res.set({

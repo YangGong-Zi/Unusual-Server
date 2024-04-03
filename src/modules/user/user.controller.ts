@@ -5,6 +5,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiHeader, ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { QueryDto } from './dto/query.dto';
+import { CheckPermissions } from '@/common/decorators/checkPermissions.decorator';
 
 @Controller({
   path: "user",
@@ -21,6 +22,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
+  @CheckPermissions(['admin', 'user:add'])
   create(@Body() userDto: UserDto, @Req() req: Request) {
     return this.userService.create(userDto, req);
   }
@@ -47,16 +49,19 @@ export class UserController {
   }
 
   @Put()
+  @CheckPermissions(['admin', 'user:edit'])
   update(@Body() updateUserDto: UpdateUserDto, @Req() req: Request) {
     return this.userService.update( updateUserDto, req);
   }
 
   @Delete(':id')
+  @CheckPermissions(['admin', 'user:del'])
   remove(@Param('id') id: string) {
     return this.userService.remove(+id);
   }
 
   @Post('/download')
+  @CheckPermissions(['admin', 'user:download'])
   async exportExcel(
     @Body() queryDto: QueryDto,
     @Res() res: Response

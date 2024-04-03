@@ -1,0 +1,49 @@
+# 项目配置
+APP:
+  prefix: '/'
+  port: 3000
+  tokenTime: 3600  # token有效时间(单位秒)
+
+# Swagger 配置
+SWAGGER:
+  prefix: '/api-docs'
+  title: 'Unusual-Admin接口文档'
+  description: '基于vue3+naive+nest的后台管理系统模板'
+  version: '1.0.0'
+
+# 数据库
+MYSQL:
+  type: mysql # 数据库链接类型
+  host: "xxxx" # 数据库地址
+  port: 3306
+  username: "xxx" # 数据库链接用户名
+  password: "xxxx" # 数据库链接密码
+  database: "xxx" # 数据库名
+  logging: false # 数据库打印日志
+  synchronize: false # 是否开启自动迁移，建议禁用，风险不可控
+  autoLoadEntities: true # 是否自动加载实体
+  keepConnectionAlive: true,
+
+# 日志
+LOG:
+ level: 'info'
+ on: true
+ dir: 'logs'
+ timestamp: true
+
+# Redis
+REDIS:
+  host: 'xxxxx' # Redis 服务器的主机名
+  port: xxxx # Redis 服务器的端口
+  password: 'xxxx' # 密码
+
+# JWT
+JWT:
+  secret: 'Unusual-Admin'
+  expiresIn: '7d'
+
+# GITHUB
+GITHUB:
+  path: 'xxxxx' # github api地址
+  Authorization: 'xxxxx' # github token
+  timeout: 60000

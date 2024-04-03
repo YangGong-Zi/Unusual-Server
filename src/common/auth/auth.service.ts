@@ -49,8 +49,7 @@ export class AuthService {
       user
     })
     const appconfig = this.configService.get('APP');
-    this.redisService.setWithExpiry(token, JSON.stringify(user), appconfig.tokenTime)
-    await this.redisService.setValue(token, JSON.stringify(user))
+    await this.redisService.setWithExpiry(token, JSON.stringify(user), appconfig.tokenTime)
     return token
   }
   // 注册
