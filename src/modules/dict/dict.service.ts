@@ -88,9 +88,15 @@ export class DictService {
     return buffer
   }
 
-  async findDetails(name: string) {
-    const dict = await this.dictEntity.findOne({ where: { name: name } });
-    const data = await this.dictDetailsService.findByPid(dict.id)
-    return data;
+  async findDetails(names: string[]) {
+    const dictPromise = names.map(async name => {
+      const dict = await this.dictEntity.findOne({ where: { name } });
+      const data = await this.dictDetailsService.findByPid(dict.id)
+      return {
+        [name]: data
+      }
+    })
+    const data = await Promise.all(dictPromise)
+    return Object.assign({}, ...data.flat());
   }
 }

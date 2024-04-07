@@ -43,8 +43,8 @@ export class DictController {
     res.send(buffer)
   }
 
-  @Get('/details')
-  findDetails(@Query('name') name: string) {
+  @Post('/details')
+  findDetails(@Body() name: string[]) {
     return this.dictService.findDetails(name);
   }
 }
