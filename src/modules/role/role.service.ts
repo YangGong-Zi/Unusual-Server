@@ -52,6 +52,7 @@ export class RoleService {
   async update(updateRoleDto: UpdateRoleDto, req: Request) {
     const user = JSON.parse(req.headers.user as string)
     const { name, remark, sort, status, id } = updateRoleDto
+    if (id === 1) throw new HttpException({message: '管理员账号不可操作'}, HttpStatus.INTERNAL_SERVER_ERROR);
     const data = {
       name,
       remark,
@@ -66,6 +67,7 @@ export class RoleService {
   }
 
   async remove(id: number) {
+    if (id === 1) throw new HttpException({message: '管理员账号不可操作'}, HttpStatus.INTERNAL_SERVER_ERROR);
     const result = await this.roleRepo.delete(id);
     if (result.affected > 0) return '删除成功';
     throw new HttpException({message: '删除失败'}, HttpStatus.INTERNAL_SERVER_ERROR);

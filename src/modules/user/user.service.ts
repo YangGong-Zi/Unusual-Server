@@ -10,6 +10,7 @@ import { generateExcel } from '@/utils/excel';
 import { QueryDto } from './dto/query.dto';
 import { RoleMenu } from '@/common/entities/RoleMenu';
 import { Menu } from '@/common/entities/Menu';
+import { md5Encrypt } from '@/utils/md5';
 
 @Injectable()
 export class UserService {
@@ -33,9 +34,10 @@ export class UserService {
     if (repeatuAccount) throw new ConflictException('账号已存在')
     if (repeatuPhone) throw new ConflictException('手机号已存在')
     if (repeatuEmail) throw new ConflictException('邮箱已存在')
+    const pwd = '123456'
     const data = {
       ...userDto,
-      password: '123456',
+      password: md5Encrypt(md5Encrypt(pwd)),
       createTime: new Date(),
       creator: user.account
     }
@@ -48,9 +50,13 @@ export class UserService {
         const role = await this.userRole.save(userRole)
         return role
       })
+      await Promise.all(rolePromiss)
     }
     const saveData = await this.userRepo.save(data);
-    if (saveData) return '新增成功';
+    if (saveData) return {
+      message: '新增成功',
+      pwd: pwd
+    };
     throw new HttpException({message: '新增失败'}, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
@@ -86,6 +92,7 @@ export class UserService {
   async update(updateUserDto: UpdateUserDto, req: Request) {
     const user = JSON.parse(req.headers.user as string)
     const { account, name, phone, email, status, id, sex } = updateUserDto
+    if (id === 1) throw new HttpException({message: '管理员账号不可操作'}, HttpStatus.INTERNAL_SERVER_ERROR);
     const data = {
       name,
       account,
@@ -114,6 +121,7 @@ export class UserService {
   }
 
   async remove(id: number) {
+    if (id === 1) throw new HttpException({message: '管理员账号不可操作'}, HttpStatus.INTERNAL_SERVER_ERROR);
     const result = await this.userRepo.delete(id);
     if (result.affected > 0) return '删除成功';
     throw new HttpException({message: '删除失败'}, HttpStatus.INTERNAL_SERVER_ERROR);
