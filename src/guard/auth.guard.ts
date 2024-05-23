@@ -46,7 +46,7 @@ export class AuthGuard implements CanActivate {
     try {
       const info = this.jwtService.verify(token);
 
-      // 如果redis中没有已当前token为键的值，那么说明当前token用户已经退出登录
+      // 如果redis中没有已当前token为键的值，那么说明当前token已经过期
       if (!await this.redisService.getValue(token)) throw new UnauthorizedException('登录 token 失效，请重新登录');
 
       request.headers.user = JSON.stringify(info.user);
