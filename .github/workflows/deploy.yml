@@ -11,24 +11,28 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
+
+    - name: Set up SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.PASSWORD }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
 
     - name: Sync to server
       uses: appleboy/scp-action@master
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
-        key: ${{ secrets.PASSWORD }}
+        key: ${{ secrets.PASSWORD }} # 使用 SSH 私钥
         source: "."
         target: "/home/Unusual-server/app"
 
+    - name: Set script permissions
+      run: |
+        ssh -i ~/.ssh/id_rsa ${{ secrets.USERNAME }}@${{ secrets.HOST }} 'chmod +x /home/Unusual-server/app/nest-setup.sh'
+
     - name: Execute script on server
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        key: ${{ secrets.PASSWORD }}
-        script: |
-          cd /home/Unusual-server
-          chmod +x nest-setup.sh # 确保脚本有执行权限
-          ./nest-setup.sh
+      run: |
+        ssh -i ~/.ssh/id_rsa ${{ secrets.USERNAME }}@${{ secrets.HOST }} 'bash /home/Unusual-server/app/nest-setup.sh'
