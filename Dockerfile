@@ -1,43 +1,28 @@
-# Step 1: 使用带有 Node.js 的基础镜像
-FROM node:18-alpine AS builder
+# 构建阶段
+FROM node:18.0-alpine3.14 as build-stage
 
-# 设置工作目录
-WORKDIR /usr/src/app
+WORKDIR /app
 
-# 复制 package.json 和 package-lock.json（如果可用）
-COPY package*.json ./
-
-#设置npm镜像源
+# 设置 npm 镜像源
+COPY package.json .
 RUN npm config set registry https://registry.npmmirror.com/
+RUN npm install
 
-# 安装项目依赖
-RUN npm install --only=production
-
-# 复制所有文件到容器中
+# 复制所有源代码并构建应用
 COPY . .
-
-# 构建应用程序
 RUN npm run build
 
-# Step 2: 运行时使用更精简的基础镜像
-FROM node:18-alpine
+# 生产阶段
+FROM node:18.0-alpine3.14 as production-stage
 
-# 创建 runc 的符号链接
-RUN ln -s /sbin/runc /usr/bin/runc
+WORKDIR /app
 
-WORKDIR /usr/src/app
+# 从构建阶段复制构建结果和 package.json
+COPY --from=build-stage /app/dist /app/dist
+COPY --from=build-stage /app/package.json /app/package.json
+COPY --from=build-stage /app/node_modules /app/node_modules
+COPY --from=build-stage /app/config /app/config
 
-# 从 builder 阶段复制构建好的文件
-COPY --from=builder /usr/src/app/dist ./dist
-COPY --from=builder /usr/src/app/config ./config
-COPY --from=builder /usr/src/app/node_modules ./node_modules
-
-# 暴露 3000 端口
+# 暴露端口并启动应用
 EXPOSE 3000
-
-# 环境变量
-# ENV NODE_ENV=prod
-
-# 运行 Nest.js 应用程序
-CMD ["node", "dist/main"]
-
+CMD ["node", "dist/main.js"]
