@@ -31,8 +31,8 @@ jobs:
 
     - name: Set script permissions
       run: |
-        ssh -i ~/.ssh/id_rsa ${{ secrets.USERNAME }}@${{ secrets.HOST }} 'chmod +x /home/Unusual-server/app/nest-setup.sh'
+        ssh -i ~/.ssh/id_rsa ${{ secrets.USERNAME }}@${{ secrets.HOST }} 'chmod +x /home/Unusual-server/nest-setup.sh'
 
     - name: Execute script on server
       run: |
-        ssh -i ~/.ssh/id_rsa ${{ secrets.USERNAME }}@${{ secrets.HOST }} 'bash /home/Unusual-server/app/nest-setup.sh'
+        ssh -i ~/.ssh/id_rsa ${{ secrets.USERNAME }}@${{ secrets.HOST }} 'bash /home/Unusual-server/nest-setup.sh'
