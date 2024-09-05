@@ -1,0 +1,34 @@
+name: Sync and Run Script on Server
+
+on:
+  push:
+    branches:
+      - master # 或者你想要触发同步的分支名
+
+jobs:
+  sync-and-run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Sync to server
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.PASSWORD }}
+        source: "."
+        target: "/home/Unusual-server/app"
+
+    - name: Execute script on server
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.PASSWORD }}
+        script: |
+          cd /home/Unusual-server
+          chmod +x nest-setup.sh # 确保脚本有执行权限
+          ./nest-setup.sh

@@ -1,0 +1,36 @@
+# 忽略node_modules目录，因为依赖项将在Dockerfile中安装
+node_modules/
+
+# 忽略dist目录，这是编译后的输出目录
+dist/
+
+# 忽略src目录下的*.spec.ts文件，这些是测试文件
+src/**/*.spec.ts
+
+# 忽略.vscode目录，其中包含IDE特定的设置
+.vscode/
+
+# 忽略npm-debug.log和yarn-error.log日志文件
+npm-debug.log
+yarn-error.log
+
+# 忽略编辑器备份文件
+*.bak
+*.swp
+*.swo
+
+# 忽略.git目录，这是版本控制信息
+.git/
+.gitignore
+.gtiyhub/
+
+# 忽略.npmrc和.yarnrc文件，这些是包管理器的配置文件
+.npmrc
+.yarnrc
+
+# 忽略npm和yarn的缓存目录
+.npm/
+.yarn/
+
+.eslintrc.js
+.prettierrc
