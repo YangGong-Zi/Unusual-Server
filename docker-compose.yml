@@ -2,6 +2,7 @@ version: '3'
 # 定义服务，即需要运行的容器集合
 services:
   nest-app:
+    container_name: nest-app
     build:
       context: ./
       dockerfile: ./Dockerfile
@@ -19,6 +20,7 @@ services:
 
   # 定义一个名为'mysql-container'的服务，使用mysql镜像
   mysql-container:
+    container_name: mysql-container
     image: mysql
     restart: always
     ports:
@@ -43,6 +45,7 @@ services:
 
   # 定义一个名为'redis-container'的服务，使用redis镜像
   redis-container:
+    container_name: redis-container
     image: redis
     # 初始配置密码
     command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
