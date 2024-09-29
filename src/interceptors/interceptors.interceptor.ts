@@ -9,7 +9,7 @@ export class TransformInterceptor implements NestInterceptor {
     const request = context.switchToHttp().getRequest();
     // 演示环境数据不可更改
     const env = process.env.NODE_ENV
-    const isPro = env === 'pro'
+    const isPro = env === 'prod'
     const white = ['/dict/details']
     const isPass = isPro && (request.method === 'DELETE' || request.method === 'PUT' || (request.method === 'POST' && !white.some(val => val === request.url)))
     if (isPass) {
