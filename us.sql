@@ -125,6 +125,8 @@ INSERT INTO `menu` VALUES (38, 12, '', '', 1, 0, 2, 4, 0, '', '导出字典', ''
 INSERT INTO `menu` VALUES (39, 12, '', '', 0, 0, 2, 5, 0, '', '删除字典详情', '', '', 1, 'dictDetails:del', NULL, NULL, '2024-02-20 16:31:51', '管理员');
 INSERT INTO `menu` VALUES (40, 12, '', '', 1, 0, 2, 6, 0, '', '新增字典详情', '', '', 1, 'dictDetails:add', NULL, NULL, '2024-04-03 14:46:14', '管理员');
 INSERT INTO `menu` VALUES (41, 12, '', '', 1, 0, 2, 7, 0, '', '修改字典详情', '', '', 1, 'dictDetails:edit', NULL, NULL, '2024-04-03 14:46:52', '管理员');
+INSERT INTO `menu` VALUES (42, 7, '/component/map', 'EchartsMap', 1, 0, 0, 4, 0, 'material-symbols:map-outline-sharp', '地图', '', 'views/component/echartsMap.vue', 1, '', '2024-04-09 14:48:26', 'admin', '2024-04-09 14:45:15', '管理员');
+
 
 -- ----------------------------
 -- Table structure for role
