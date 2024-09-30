@@ -10,7 +10,7 @@ export class TransformInterceptor implements NestInterceptor {
     // 演示环境数据不可更改
     const env = process.env.NODE_ENV
     const isPro = env === 'prod'
-    const white = ['/dict/details']
+    const white = ['/dict/details', '/login']
     const isPass = isPro && (request.method === 'DELETE' || request.method === 'PUT' || (request.method === 'POST' && !white.some(val => val === request.url)))
     if (isPass) {
       throw new HttpException({ message: '演示环境数据不可更改', code: 999 }, 200)
