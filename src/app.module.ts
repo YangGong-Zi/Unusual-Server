@@ -17,6 +17,7 @@ import { DictModule } from './modules/dict/dict.module';
 import { RoleModule } from './modules/role/role.module';
 import { DictDetailsModule } from './modules/dict-details/dict-details.module';
 import { DictUpdateMiddleware } from './common/middleware/dict-update.middleware';
+import { DictVersionModule } from './modules/dict-version/dict-version.module';
 
 @Module({
   imports: [
@@ -67,6 +68,7 @@ import { DictUpdateMiddleware } from './common/middleware/dict-update.middleware
     DictModule,
     RoleModule,
     DictDetailsModule,
+    DictVersionModule,
   ],
   controllers: [AppController],
   providers: [

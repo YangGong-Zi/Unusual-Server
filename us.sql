@@ -1,17 +1,17 @@
 /*
- Navicat Premium Data Transfer
+ Navicat Premium Dump SQL
 
  Source Server         : y-database
  Source Server Type    : MySQL
- Source Server Version : 50744
- Source Host           : xxx.xx.xx.xx:3306
+ Source Server Version : 90001 (9.0.1)
+ Source Host           : 47.109.70.116:3306
  Source Schema         : us
 
  Target Server Type    : MySQL
- Target Server Version : 50744
+ Target Server Version : 90001 (9.0.1)
  File Encoding         : 65001
 
- Date: 08/04/2024 15:47:19
+ Date: 09/12/2025 15:21:12
 */
 
 SET NAMES utf8mb4;
@@ -22,7 +22,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- ----------------------------
 DROP TABLE IF EXISTS `dict`;
 CREATE TABLE `dict`  (
-  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '字典id',
+  `id` int NOT NULL AUTO_INCREMENT COMMENT '字典id',
   `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '字典名称',
   `description` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '字典描述',
   `createTime` datetime NOT NULL COMMENT '字典创建时间',
@@ -30,7 +30,7 @@ CREATE TABLE `dict`  (
   `creator` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '创建人',
   `updater` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '更新人',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 19 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 19 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of dict
@@ -43,17 +43,17 @@ INSERT INTO `dict` VALUES (2, 'sex', '性别', '2024-03-04 15:36:22', NULL, NULL
 -- ----------------------------
 DROP TABLE IF EXISTS `dict_details`;
 CREATE TABLE `dict_details`  (
-  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '字典值id',
-  `pid` int(11) NOT NULL COMMENT '字典id',
+  `id` int NOT NULL AUTO_INCREMENT COMMENT '字典值id',
+  `pid` int NOT NULL COMMENT '字典id',
   `label` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '字典值',
   `value` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '字典键',
-  `dictSort` int(10) NULL DEFAULT NULL COMMENT '字典值描述',
+  `dictSort` int NULL DEFAULT NULL COMMENT '字典值描述',
   `createTime` datetime NULL DEFAULT NULL COMMENT '字典值创建时间',
   `updateTime` datetime NULL DEFAULT NULL COMMENT '字典值更新时间',
   `creator` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '创建人',
   `updater` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '更新人',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '字典详情表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '字典详情表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of dict_details
@@ -64,31 +64,48 @@ INSERT INTO `dict_details` VALUES (3, 2, '男', '0', 1, '2024-03-12 10:38:47', '
 INSERT INTO `dict_details` VALUES (4, 2, '女', '1', 2, '2024-03-12 10:39:06', NULL, NULL, NULL);
 
 -- ----------------------------
+-- Table structure for dict_version
+-- ----------------------------
+DROP TABLE IF EXISTS `dict_version`;
+CREATE TABLE `dict_version`  (
+  `id` int NOT NULL COMMENT '主键ID，固定为1，确保单条记录',
+  `version` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '00.00.00' COMMENT '版本号，格式：XX.XX.XX',
+  `updateTime` datetime NOT NULL COMMENT '更新时间',
+  `updater` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '更新人',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of dict_version
+-- ----------------------------
+INSERT INTO `dict_version` VALUES (1, '00.00.00', '2025-12-09 15:47:19', 'admin');
+
+-- ----------------------------
 -- Table structure for menu
 -- ----------------------------
 DROP TABLE IF EXISTS `menu`;
 CREATE TABLE `menu`  (
-  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '菜单id',
-  `pid` int(11) NOT NULL COMMENT 'pid',
-  `path` varchar(60) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '路由path',
-  `name` varchar(60) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '组件名称',
+  `id` int NOT NULL AUTO_INCREMENT COMMENT '菜单id',
+  `pid` int NOT NULL COMMENT 'pid',
+  `path` varchar(60) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '路由path',
+  `name` varchar(60) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '组件名称',
   `visibily` tinyint(1) NOT NULL COMMENT '是否可见(0：不可见，1：可见)',
   `externalLink` tinyint(1) NOT NULL COMMENT '外部链接(0：是，1：不是)',
-  `menuType` int(11) NOT NULL COMMENT '菜单类型(0:菜单，1：目录， 2：按钮)',
-  `sort` int(11) NOT NULL COMMENT 'sort排序',
+  `menuType` int NOT NULL COMMENT '菜单类型(0:菜单，1：目录， 2：按钮)',
+  `sort` int NOT NULL COMMENT 'sort排序',
   `keepAlive` tinyint(1) NULL DEFAULT NULL COMMENT 'KeepAlive缓存(0：不缓存，1：缓存)',
-  `icon` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '图标名称',
-  `title` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '名称',
-  `link` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT 'link',
-  `component` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '组件路径',
+  `icon` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '图标名称',
+  `title` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '名称',
+  `link` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT 'link',
+  `component` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '组件路径',
   `isLeaf` tinyint(1) NULL DEFAULT NULL COMMENT '是否存在子节点（0：不存在，1：存在）',
   `competence` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '权限标识',
   `updateTime` datetime NULL DEFAULT NULL COMMENT '更新时间',
-  `updater` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '更新人',
+  `updater` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '更新人',
   `createTime` datetime NULL DEFAULT NULL COMMENT '创建时间',
-  `creator` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '创建人',
+  `creator` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '创建人',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 42 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 43 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of menu
@@ -127,21 +144,20 @@ INSERT INTO `menu` VALUES (40, 12, '', '', 1, 0, 2, 6, 0, '', '新增字典详�
 INSERT INTO `menu` VALUES (41, 12, '', '', 1, 0, 2, 7, 0, '', '修改字典详情', '', '', 1, 'dictDetails:edit', NULL, NULL, '2024-04-03 14:46:52', '管理员');
 INSERT INTO `menu` VALUES (42, 7, '/component/map', 'EchartsMap', 1, 0, 0, 4, 0, 'material-symbols:map-outline-sharp', '地图', '', 'views/component/echartsMap.vue', 1, '', '2024-04-09 14:48:26', 'admin', '2024-04-09 14:45:15', '管理员');
 
-
 -- ----------------------------
 -- Table structure for role
 -- ----------------------------
 DROP TABLE IF EXISTS `role`;
 CREATE TABLE `role`  (
-  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '角色ID',
-  `name` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '角色名称',
-  `sort` int(10) NOT NULL COMMENT '角色排序',
-  `status` int(1) NOT NULL COMMENT '角色状态：1-启用、0-禁用',
-  `remark` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '角色描述',
+  `id` int NOT NULL AUTO_INCREMENT COMMENT '角色ID',
+  `name` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '角色名称',
+  `sort` int NOT NULL COMMENT '角色排序',
+  `status` int NOT NULL COMMENT '角色状态：1-启用、0-禁用',
+  `remark` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '角色描述',
   `createTime` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `updateTime` datetime NULL DEFAULT NULL COMMENT '更新时间',
-  `updater` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '更新人',
-  `creator` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '创建人',
+  `updater` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '更新人',
+  `creator` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '创建人',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '角色表' ROW_FORMAT = DYNAMIC;
 
@@ -156,9 +172,9 @@ INSERT INTO `role` VALUES (2, '测试', 2, 1, '测试', '2024-04-07 17:11:34', '
 -- ----------------------------
 DROP TABLE IF EXISTS `role_menu`;
 CREATE TABLE `role_menu`  (
-  `menu_id` int(11) NULL DEFAULT NULL COMMENT '菜单id',
-  `role_id` int(11) NULL DEFAULT NULL COMMENT '角色id'
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+  `menu_id` int NULL DEFAULT NULL COMMENT '菜单id',
+  `role_id` int NULL DEFAULT NULL COMMENT '角色id'
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of role_menu
@@ -190,14 +206,14 @@ INSERT INTO `role_menu` VALUES (15, 1);
 -- ----------------------------
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user`  (
-  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '用户主键ID',
+  `id` int NOT NULL AUTO_INCREMENT COMMENT '用户主键ID',
   `account` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '账号',
   `password` varchar(255) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL COMMENT '用户密码',
   `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '用户名称',
-  `status` int(11) NOT NULL COMMENT '用户状态（0-禁用，1-启用）',
+  `status` int NOT NULL COMMENT '用户状态（0-禁用，1-启用）',
   `email` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '邮箱',
   `age` char(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '年龄',
-  `sex` int(11) NULL DEFAULT NULL COMMENT '性别（0-女，1-男）',
+  `sex` int NULL DEFAULT NULL COMMENT '性别（0-女，1-男）',
   `phone` varchar(11) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '手机号',
   `createTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `updateTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
@@ -217,9 +233,9 @@ INSERT INTO `user` VALUES (2, 'test001', '14e1b600b1fd579f47433b88e8d85291', '�
 -- ----------------------------
 DROP TABLE IF EXISTS `user_role`;
 CREATE TABLE `user_role`  (
-  `role_id` int(11) NULL DEFAULT NULL COMMENT '角色id',
-  `user_id` int(11) NULL DEFAULT NULL COMMENT '用户id'
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+  `role_id` int NULL DEFAULT NULL COMMENT '角色id',
+  `user_id` int NULL DEFAULT NULL COMMENT '用户id'
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of user_role

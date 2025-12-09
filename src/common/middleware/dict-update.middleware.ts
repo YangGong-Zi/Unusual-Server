@@ -1,29 +1,24 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { NextFunction, Request, Response } from 'express';
-import { RedisService } from '../redis/redis.service';
+import { DictVersionService } from '../../modules/dict-version/dict-version.service';
 
 @Injectable()
 export class DictUpdateMiddleware implements NestMiddleware {
-  constructor(private readonly redisService: RedisService) {}
+  constructor(private readonly dictVersionService: DictVersionService) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
     try {
-      // 原子操作：获取并删除Redis中的dict-update值
-      const dictUpdateValue = await this.redisService.getValue('dict-update');
+      // Get latest dict version from service
+      const latestVersion = await this.dictVersionService.getCurrentVersion();
       
-      if (dictUpdateValue) {
-        // 添加到响应头
-        res.setHeader('dict-update', dictUpdateValue);
-        
-        // 清空Redis中的值
-        await this.redisService.deleteKey('dict-update');
-      }
+      // Add version to response header using recommended name
+      res.setHeader('X-Dictionary-Version', latestVersion);
     } catch (error) {
-      // Redis操作失败，记录错误但不影响请求处理
-      console.error('DictUpdateMiddleware处理失败:', error);
+      // Service operation failed, record error but don't block request
+      console.error('DictUpdateMiddleware: Failed to get latest dict version:', error);
     }
     
-    // 继续处理请求
+    // Continue processing request
     next();
   }
 }

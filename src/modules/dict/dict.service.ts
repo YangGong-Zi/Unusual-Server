@@ -1,22 +1,21 @@
-import { HttpException, HttpStatus, Inject, Injectable, forwardRef } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { DictDto } from './dto/dict.dto';
 import { UpdateDictDto } from './dto/update-dict.dto';
 import { Dict as DictEntity } from '@/common/entities/Dict';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ILike, Repository } from 'typeorm';
+import { ILike, Repository, getManager } from 'typeorm';
 import { Request } from 'express';
 import { generateExcel } from '@/utils/excel';
 import { DictDetailsService } from '../dict-details/dict-details.service';
 import { QueryDto } from './dto/query.dto';
-import { RedisService } from '@/common/redis/redis.service';
+import { DictVersionService } from '../dict-version/dict-version.service';
 
 @Injectable()
 export class DictService {
 
   constructor(
-    @Inject(forwardRef(() => DictDetailsService))
     private readonly dictDetailsService: DictDetailsService,
-    private readonly redisService: RedisService
+    private readonly dictVersionService: DictVersionService
   ) {}
 
   @InjectRepository(DictEntity)
@@ -29,13 +28,16 @@ export class DictService {
       createTime: new Date(),
       creator: user.account
     }
-    const savedDict = await this.dictEntity.save(data);
-    if (savedDict) {
-      // 更新Redis中的dict-update键
-      await this.updateDictRedis(savedDict.name);
-      return '新增成功';
-    }
-    throw new HttpException({message: '新增失败'}, HttpStatus.INTERNAL_SERVER_ERROR);
+    
+    // Use transaction to ensure data consistency
+    await this.dictEntity.manager.transaction(async (transactionalEntityManager) => {
+      await transactionalEntityManager.save(DictEntity, data);
+      
+      // Update dict version
+      await this.dictVersionService.updateVersion(user.account);
+    });
+    
+    return '新增成功';
   }
 
   async findAll(page: number, pageSize: number, name: string) {
@@ -51,7 +53,6 @@ export class DictService {
       }
     });
 
-
     return { data: dict, total };
   }
 
@@ -62,29 +63,44 @@ export class DictService {
       updateTime: new Date(),
       updater: user.account
     }
-    const result = await this.dictEntity.update(updateDictDto.id, data);
-    if (result.affected > 0) {
-      // 更新Redis中的dict-update键
-      await this.updateDictRedis(updateDictDto.name);
-      return '修改成功';
-    }
-    throw new HttpException({message: '修改失败'}, HttpStatus.INTERNAL_SERVER_ERROR);
+    
+    // Use transaction to ensure data consistency
+    await this.dictEntity.manager.transaction(async (transactionalEntityManager) => {
+      const result = await transactionalEntityManager.update(DictEntity, updateDictDto.id, data);
+      
+      if (result.affected === 0) {
+        throw new HttpException({ message: '修改失败' }, HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+      
+      // Update dict version
+      await this.dictVersionService.updateVersion(user.account);
+    });
+    
+    return '修改成功';
   }
 
-  async remove(id: number) {
+  async remove(id: number, req: Request) {
     // 先获取字典名称
     const dict = await this.dictEntity.findOne({ where: { id } });
     if (!dict) {
       throw new HttpException({message: '字典不存在'}, HttpStatus.NOT_FOUND);
     }
     
-    const result = await this.dictEntity.delete(id);
-    if (result.affected > 0) {
-      // 更新Redis中的dict-update键
-      await this.updateDictRedis(dict.name);
-      return '删除成功';
-    }
-    throw new HttpException({message: '删除失败'}, HttpStatus.INTERNAL_SERVER_ERROR);
+    const user = JSON.parse(req.headers.user as string);
+    
+    // Use transaction to ensure data consistency
+    await this.dictEntity.manager.transaction(async (transactionalEntityManager) => {
+      const result = await transactionalEntityManager.delete(DictEntity, id);
+      
+      if (result.affected === 0) {
+        throw new HttpException({ message: '删除失败' }, HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+      
+      // Update dict version
+      await this.dictVersionService.updateVersion(user.account);
+    });
+    
+    return '删除成功';
   }
 
   async exportExcel(queryDto: QueryDto) {
@@ -121,38 +137,5 @@ export class DictService {
     })
     const data = await Promise.all(dictPromise)
     return Object.assign({}, ...data.flat());
-  }
-
-  /**
-   * 更新Redis中的dict-update键
-   * @param dictName 字典名称
-   */
-  private async updateDictRedis(dictName: string): Promise<void> {
-    try {
-      // 获取当前的dict-update值
-      const currentValue = await this.redisService.getValue('dict-update');
-      let newValue: string;
-      
-      if (currentValue) {
-        // 如果已有值，检查是否已包含当前字典名称
-        const dictNames = currentValue.split(',');
-        if (!dictNames.includes(dictName)) {
-          // 如果不包含，添加到现有值中
-          newValue = `${currentValue},${dictName}`;
-        } else {
-          // 如果已包含，不需要更新
-          return;
-        }
-      } else {
-        // 如果没有值，直接设置为当前字典名称
-        newValue = dictName;
-      }
-      
-      // 保存到Redis
-      await this.redisService.setValue('dict-update', newValue);
-    } catch (error) {
-      // Redis操作失败，记录错误但不影响正常业务
-      console.error('更新Redis dict-update失败:', error);
-    }
   }
 }

@@ -27,7 +27,7 @@ export class DictDetailsController {
 
   @Delete(':id')
   @CheckPermissions(['admin', 'dictDetails:del'])
-  remove(@Param('id') id: number) {
-    return this.dictDetailsService.remove(id);
+  remove(@Param('id') id: number, @Req() req: Request) {
+    return this.dictDetailsService.remove(id, req);
   }
 }
