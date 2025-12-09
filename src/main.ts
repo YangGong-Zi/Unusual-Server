@@ -9,6 +9,7 @@ import { AuthGuard } from './guard/auth.guard';
 import { JwtService } from '@nestjs/jwt';
 import { RedisService } from './common/redis/redis.service';
 import { UserService } from './modules/user/user.service';
+import { DictUpdateMiddleware } from './common/middleware/dict-update.middleware';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -44,6 +45,10 @@ async function bootstrap() {
   const redisService = app.get<RedisService>(RedisService)
   const userService = app.get<UserService>(UserService)
   app.useGlobalGuards(new AuthGuard(jwtService, redisService, userService));
+
+  // 注册DictUpdate中间件
+  const dictUpdateMiddleware = app.get<DictUpdateMiddleware>(DictUpdateMiddleware);
+  app.use(dictUpdateMiddleware.use.bind(dictUpdateMiddleware));
 
   await app.listen(appConfig.port);
 

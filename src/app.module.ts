@@ -16,6 +16,7 @@ import { MenuModule } from './modules/menu/menu.module';
 import { DictModule } from './modules/dict/dict.module';
 import { RoleModule } from './modules/role/role.module';
 import { DictDetailsModule } from './modules/dict-details/dict-details.module';
+import { DictUpdateMiddleware } from './common/middleware/dict-update.middleware';
 
 @Module({
   imports: [
@@ -71,6 +72,7 @@ import { DictDetailsModule } from './modules/dict-details/dict-details.module';
   providers: [
     AppService,
     Logger,
+    DictUpdateMiddleware,
   ],
   exports: [Logger],
 })
