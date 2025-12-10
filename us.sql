@@ -11,7 +11,7 @@
  Target Server Version : 90001 (9.0.1)
  File Encoding         : 65001
 
- Date: 09/12/2025 15:21:12
+ Date: 10/12/2025 09:35:09
 */
 
 SET NAMES utf8mb4;
@@ -35,7 +35,7 @@ CREATE TABLE `dict`  (
 -- ----------------------------
 -- Records of dict
 -- ----------------------------
-INSERT INTO `dict` VALUES (1, 'status', '启用状态', '2024-03-04 15:35:52', '2024-03-12 10:57:06', NULL, 'admin');
+INSERT INTO `dict` VALUES (1, 'status', '启用状态1', '2024-03-04 15:35:52', '2025-12-09 15:49:26', NULL, 'admin');
 INSERT INTO `dict` VALUES (2, 'sex', '性别', '2024-03-04 15:36:22', NULL, NULL, NULL);
 
 -- ----------------------------
@@ -78,7 +78,7 @@ CREATE TABLE `dict_version`  (
 -- ----------------------------
 -- Records of dict_version
 -- ----------------------------
-INSERT INTO `dict_version` VALUES (1, '00.00.00', '2025-12-09 15:47:19', 'admin');
+INSERT INTO `dict_version` VALUES (1, '00.00.03', '2025-12-09 15:47:19', 'admin');
 
 -- ----------------------------
 -- Table structure for menu
@@ -105,7 +105,7 @@ CREATE TABLE `menu`  (
   `createTime` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `creator` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '创建人',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 43 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 44 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of menu
@@ -142,7 +142,8 @@ INSERT INTO `menu` VALUES (38, 12, '', '', 1, 0, 2, 4, 0, '', '导出字典', ''
 INSERT INTO `menu` VALUES (39, 12, '', '', 0, 0, 2, 5, 0, '', '删除字典详情', '', '', 1, 'dictDetails:del', NULL, NULL, '2024-02-20 16:31:51', '管理员');
 INSERT INTO `menu` VALUES (40, 12, '', '', 1, 0, 2, 6, 0, '', '新增字典详情', '', '', 1, 'dictDetails:add', NULL, NULL, '2024-04-03 14:46:14', '管理员');
 INSERT INTO `menu` VALUES (41, 12, '', '', 1, 0, 2, 7, 0, '', '修改字典详情', '', '', 1, 'dictDetails:edit', NULL, NULL, '2024-04-03 14:46:52', '管理员');
-INSERT INTO `menu` VALUES (42, 7, '/component/map', 'EchartsMap', 1, 0, 0, 4, 0, 'material-symbols:map-outline-sharp', '地图', '', 'views/component/echartsMap.vue', 1, '', '2024-04-09 14:48:26', 'admin', '2024-04-09 14:45:15', '管理员');
+INSERT INTO `menu` VALUES (42, 7, '/component/map', 'EchartsMap', 1, 0, 0, 5, 0, 'material-symbols:map-outline-sharp', '地图', '', 'views/component/echartsMap.vue', 1, '', '2025-12-10 09:19:59', 'admin', '2024-04-09 14:45:15', '管理员');
+INSERT INTO `menu` VALUES (43, 7, '/component/sseDemo', 'SseDemo', 1, 0, 0, 1, 0, 'iconoir:tools', 'Sse-Demo', '', 'views/component/sseDemo.vue', 1, '', '2025-12-10 09:26:38', 'admin', '2025-12-10 09:21:47', '管理员');
 
 -- ----------------------------
 -- Table structure for role
@@ -200,6 +201,7 @@ INSERT INTO `role_menu` VALUES (12, 1);
 INSERT INTO `role_menu` VALUES (14, 1);
 INSERT INTO `role_menu` VALUES (13, 1);
 INSERT INTO `role_menu` VALUES (15, 1);
+INSERT INTO `role_menu` VALUES (43, 1);
 
 -- ----------------------------
 -- Table structure for user
